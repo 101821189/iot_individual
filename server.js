@@ -54,87 +54,87 @@ board.on('ready', function() {
     }
   });
 
-  // var photoresistor = new five.Sensor({  // Photresistor
-  //   pin: "A2",
-  //   freq: 250
-  // });
+  var photoresistor = new five.Sensor({  // Photresistor
+    pin: "A2",
+    freq: 250
+  });
 
   // Reading Sockets
   io.on('connection', function (socket) {
 
-    // // inject photoresistor into johnny-five raple
-    // board.repl.inject({
-    //   pot: photoresistor
-    // });
+    // inject photoresistor into johnny-five raple
+    board.repl.inject({
+      pot: photoresistor
+    });
 
-    // // photoresister receiving data
-    // photoresistor.on("data", function() {
-    //   console.log(this.value);
+    // photoresister receiving data
+    photoresistor.on("data", function() {
+      console.log(this.value);
 
-    //   if(this.value < 900 ) {
-    //     // ALL LOGIC BELOW GOES HERE
-    //   }
-    // });
+      if(this.value < 900 ) {
+                // Turn on led
+            const ledTrigger = () => {
+              console.log('trigger');
+              led.on();
+            }
 
-    // Turn on led
-    const ledTrigger = () => {
-      console.log('trigger');
-      led.on();
-    }
+            // Button will simulate PIR sensor
+            button.on("hold", function() {
+              console.log('lock', lock);
+              if (lock) {
+                console.log('motion sensor is locked');
+              }
+              else {
+                console.log( "Button pressed" );
+                duration += 1;
+                ledTrigger();
+              }
+            });
 
-    // Button will simulate PIR sensor
-    button.on("hold", function() {
-      console.log('lock', lock);
-      if (lock) {
-        console.log('motion sensor is locked');
-      }
-      else {
-        console.log( "Button pressed" );
-        duration += 1;
-        ledTrigger();
+            // Can no longer sense motion
+            button.on("release", function() {
+              if (lock) {
+                console.log('motion sensor is locked');
+              }
+              else {
+                // turn off light
+                led.off();
+                console.log(duration);
+
+                // store data to database
+                var ledData = new Led({
+                  date: moment(Date.now()).format('MMMM Do YYYY, h:mm:ss a'),
+                  duration: duration
+                });
+                ledData.save().then((doc) => {
+                  console.log(doc);
+                });
+
+                socket.emit('duration', {duration});
+
+                duration = 0;
+              }
+            });
+
+            // Subscription to lock button
+            socket.on('lock', function(data) {
+              console.log('website sent me data', data)
+              lock = data.lock;
+            });
+            socket.emit('lock');
+
+            // Subscription to unlock button
+            socket.on('unlock', function(data) {
+              console.log('website sent me data', data)
+              lock = data.unlock;
+            });
+
+            socket.emit('unlock');
+
       }
     });
 
-    // Can no longer sense motion
-    button.on("release", function() {
-      if (lock) {
-        console.log('motion sensor is locked');
-      }
-      else {
-        // turn off light
-        led.off();
-        console.log(duration);
-
-        // store data to database
-        var ledData = new Led({
-          date: moment(Date.now()).format('MMMM Do YYYY, h:mm:ss a'),
-          duration: duration
-        });
-        ledData.save().then((doc) => {
-          console.log(doc);
-        });
-
-        socket.emit('duration', {duration});
-
-        duration = 0;
-      }
-    });
-
-    // Subscription to lock button
-    socket.on('lock', function(data) {
-      console.log('website sent me data', data)
-      lock = data.lock;
-    });
-    socket.emit('lock');
-
-     // Subscription to unlock button
-     socket.on('unlock', function(data) {
-      console.log('website sent me data', data)
-      lock = data.unlock;
-    });
-
-    socket.emit('unlock');
-
+   
 });
 
 });
