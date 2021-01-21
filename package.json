@@ -54,7 +54,7 @@
     "react-router-dom": "4.2.2",
     "sass-loader": "7.1.0",
     "serialport": "^7.1.4",
-    "socket.io": "^2.2.0",
+    "socket.io": "^2.4.0",
     "socket.io-client": "^2.2.0",
     "style-loader": "0.23.1",
     "validator": "10.8.0",
