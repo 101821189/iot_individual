@@ -41,7 +41,7 @@
     "body-parser": "1.18.3",
     "css-loader": "1.0.1",
     "eslint-config-prettier": "2.9.0",
-    "express": "4.16.3",
+    "express": "4.17.3",
     "history": "^4.9.0",
     "live-server": "1.2.0",
     "lodash.random": "3.2.0",
